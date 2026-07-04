@@ -1,0 +1,1 @@
+package com.warehouse.twin.service; import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl; import com.warehouse.twin.entity.Camera; import com.warehouse.twin.mapper.CameraMapper; import org.springframework.stereotype.Service; @Service public class CameraService extends ServiceImpl<CameraMapper,Camera>{}

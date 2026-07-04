@@ -1,0 +1,10 @@
+backend_url: http://127.0.0.1:8080/api/detect/result
+weights: ../../yolov5s.pt
+confidence: 0.35
+iou: 0.45
+image_size: 640
+process_every_n_frames: 3
+cameras:
+  - camera_id: CAM_01
+    rtsp_url: rtsp://user:password@192.168.1.10/stream1
+    enabled: false

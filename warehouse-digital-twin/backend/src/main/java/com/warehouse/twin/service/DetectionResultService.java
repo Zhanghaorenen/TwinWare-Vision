@@ -1,0 +1,1 @@
+package com.warehouse.twin.service; import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl; import com.warehouse.twin.entity.DetectionResult; import com.warehouse.twin.mapper.DetectionResultMapper; import org.springframework.stereotype.Service; @Service public class DetectionResultService extends ServiceImpl<DetectionResultMapper,DetectionResult>{}

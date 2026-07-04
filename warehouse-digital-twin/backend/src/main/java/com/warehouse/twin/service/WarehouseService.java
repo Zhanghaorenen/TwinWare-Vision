@@ -1,0 +1,1 @@
+package com.warehouse.twin.service; import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl; import com.warehouse.twin.entity.Warehouse; import com.warehouse.twin.mapper.WarehouseMapper; import org.springframework.stereotype.Service; @Service public class WarehouseService extends ServiceImpl<WarehouseMapper,Warehouse>{}

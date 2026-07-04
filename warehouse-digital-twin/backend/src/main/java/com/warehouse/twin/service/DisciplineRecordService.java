@@ -1,0 +1,1 @@
+package com.warehouse.twin.service; import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl; import com.warehouse.twin.entity.DisciplineRecord; import com.warehouse.twin.mapper.DisciplineRecordMapper; import org.springframework.stereotype.Service; @Service public class DisciplineRecordService extends ServiceImpl<DisciplineRecordMapper,DisciplineRecord>{}

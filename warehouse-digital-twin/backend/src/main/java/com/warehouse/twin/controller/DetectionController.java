@@ -1,0 +1,3 @@
+package com.warehouse.twin.controller;
+import com.warehouse.twin.common.Result; import com.warehouse.twin.dto.DetectionRequest; import com.warehouse.twin.service.DetectionPipelineService; import jakarta.validation.Valid; import org.springframework.web.bind.annotation.*; import java.util.Map;
+@RestController @RequestMapping("/api/detect") public class DetectionController {private final DetectionPipelineService service;public DetectionController(DetectionPipelineService s){service=s;}@PostMapping("/result")public Result<Map<String,Object>> receive(@Valid @RequestBody DetectionRequest r){return Result.ok(service.process(r));}}

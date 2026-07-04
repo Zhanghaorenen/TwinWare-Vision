@@ -1,0 +1,1 @@
+package com.warehouse.twin.mapper; import com.baomidou.mybatisplus.core.mapper.BaseMapper; import com.warehouse.twin.entity.WarehouseArea; public interface WarehouseAreaMapper extends BaseMapper<WarehouseArea>{}

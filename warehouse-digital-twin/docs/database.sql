@@ -1,0 +1,81 @@
+CREATE DATABASE IF NOT EXISTS warehouse_twin DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE warehouse_twin;
+
+CREATE TABLE IF NOT EXISTS warehouse (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, code VARCHAR(32) NOT NULL UNIQUE, name VARCHAR(100) NOT NULL,
+ address VARCHAR(255), status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE', remark VARCHAR(500),
+ create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS warehouse_area (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, warehouse_id BIGINT NOT NULL, code VARCHAR(32) NOT NULL UNIQUE, name VARCHAR(100) NOT NULL,
+ polygon JSON, remark VARCHAR(500), create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ CONSTRAINT fk_area_warehouse FOREIGN KEY(warehouse_id) REFERENCES warehouse(id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS shelf (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, area_id BIGINT NOT NULL, code VARCHAR(32) NOT NULL UNIQUE, name VARCHAR(100) NOT NULL,
+ row_count INT DEFAULT 1, column_count INT DEFAULT 1, remark VARCHAR(500), create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ CONSTRAINT fk_shelf_area FOREIGN KEY(area_id) REFERENCES warehouse_area(id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS camera (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, code VARCHAR(32) NOT NULL UNIQUE, name VARCHAR(100) NOT NULL, rtsp_url VARCHAR(500),
+ install_position VARCHAR(255), area_id BIGINT, monitor_target VARCHAR(255), online_status TINYINT NOT NULL DEFAULT 0, remark VARCHAR(500),
+ create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ KEY idx_camera_area(area_id), CONSTRAINT fk_camera_area FOREIGN KEY(area_id) REFERENCES warehouse_area(id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS slot (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, warehouse_id BIGINT NOT NULL, shelf_id BIGINT NOT NULL, camera_id BIGINT,
+ code VARCHAR(32) NOT NULL UNIQUE, polygon JSON NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'EMPTY', cargo_type VARCHAR(64),
+ last_update_time DATETIME, remark VARCHAR(500), create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ KEY idx_slot_camera(camera_id), KEY idx_slot_status(status), CONSTRAINT fk_slot_warehouse FOREIGN KEY(warehouse_id) REFERENCES warehouse(id),
+ CONSTRAINT fk_slot_shelf FOREIGN KEY(shelf_id) REFERENCES shelf(id), CONSTRAINT fk_slot_camera FOREIGN KEY(camera_id) REFERENCES camera(id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS detection_result (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, camera_id BIGINT NOT NULL, captured_at DATETIME NOT NULL, objects_json JSON NOT NULL, image_url VARCHAR(500),
+ create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ KEY idx_detection_camera_time(camera_id,captured_at), CONSTRAINT fk_detection_camera FOREIGN KEY(camera_id) REFERENCES camera(id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS warehouse_event (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, event_type VARCHAR(32) NOT NULL, camera_id BIGINT, slot_id BIGINT, object_type VARCHAR(64), actor_type VARCHAR(32),
+ confidence DECIMAL(6,5), image_url VARCHAR(500), event_time DATETIME NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'PENDING', remark VARCHAR(500),
+ create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ KEY idx_event_time(event_time), KEY idx_event_slot(slot_id), CONSTRAINT fk_event_camera FOREIGN KEY(camera_id) REFERENCES camera(id), CONSTRAINT fk_event_slot FOREIGN KEY(slot_id) REFERENCES slot(id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS slot_state_history (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, slot_id BIGINT NOT NULL, previous_status VARCHAR(20), current_status VARCHAR(20) NOT NULL,
+ source VARCHAR(20) NOT NULL, event_id BIGINT, changed_at DATETIME NOT NULL, remark VARCHAR(500),
+ create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ KEY idx_history_slot_time(slot_id,changed_at), CONSTRAINT fk_history_slot FOREIGN KEY(slot_id) REFERENCES slot(id), CONSTRAINT fk_history_event FOREIGN KEY(event_id) REFERENCES warehouse_event(id)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS alarm (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, alarm_type VARCHAR(64) NOT NULL, location VARCHAR(255), level VARCHAR(20) NOT NULL,
+ trigger_time DATETIME NOT NULL, image_url VARCHAR(500), status VARCHAR(20) NOT NULL DEFAULT 'PENDING', handler VARCHAR(64), handled_at DATETIME, remark VARCHAR(500),
+ create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ KEY idx_alarm_status_time(status,trigger_time)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS person_state (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, person_id VARCHAR(64) NOT NULL, camera_id VARCHAR(32), state VARCHAR(20) NOT NULL,
+ risk_score DECIMAL(5,4), visual_weight DECIMAL(5,4), audio_weight DECIMAL(5,4), text_weight DECIMAL(5,4), behavior_weight DECIMAL(5,4), environment_weight DECIMAL(5,4),
+ timestamp DATETIME NOT NULL, create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ KEY idx_person_time(person_id,timestamp)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `user` (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(64) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL, real_name VARCHAR(64),
+ role VARCHAR(32) NOT NULL DEFAULT 'OPERATOR', status TINYINT NOT NULL DEFAULT 1,
+ create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS discipline_record (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, event_id BIGINT NOT NULL UNIQUE, person_id VARCHAR(64) NOT NULL,
+ action_type VARCHAR(20) NOT NULL, points INT NOT NULL, warning_level VARCHAR(20), reason VARCHAR(500), reviewer VARCHAR(64) NOT NULL, reviewed_at DATETIME NOT NULL,
+ create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ CONSTRAINT fk_discipline_event FOREIGN KEY(event_id) REFERENCES warehouse_event(id)
+) ENGINE=InnoDB;
+
+INSERT IGNORE INTO warehouse(id,code,name,address) VALUES(1,'WH-01','一号智能仓库','工厂东区');
+INSERT IGNORE INTO warehouse_area(id,warehouse_id,code,name,polygon) VALUES(1,1,'AREA-A','A区','[[0,0],[1000,0],[1000,800],[0,800]]');
+INSERT IGNORE INTO shelf(id,area_id,code,name,row_count,column_count) VALUES(1,1,'SHELF-A','A区一号货架',3,4);
+INSERT IGNORE INTO camera(id,code,name,rtsp_url,install_position,area_id,monitor_target,online_status) VALUES(1,'CAM_01','A区固定摄像头','rtsp://user:password@192.168.1.10/stream1','A区北墙',1,'SHELF-A',1);
+INSERT IGNORE INTO slot(id,warehouse_id,shelf_id,camera_id,code,polygon,status) VALUES
+(1,1,1,1,'A01','[[100,80],[220,80],[220,180],[100,180]]','EMPTY'),
+(2,1,1,1,'A02','[[240,80],[360,80],[360,180],[240,180]]','EMPTY'),
+(3,1,1,1,'A03','[[380,80],[500,80],[500,180],[380,180]]','OCCUPIED');
+INSERT IGNORE INTO `user`(id,username,password,real_name,role) VALUES(1,'admin','{noop}change-me','系统管理员','ADMIN');

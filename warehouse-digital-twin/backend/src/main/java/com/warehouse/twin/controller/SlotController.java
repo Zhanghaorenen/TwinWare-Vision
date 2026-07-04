@@ -1,0 +1,4 @@
+package com.warehouse.twin.controller;
+import com.baomidou.mybatisplus.extension.service.IService; import com.warehouse.twin.common.Result; import com.warehouse.twin.dto.SlotCorrectionRequest; import com.warehouse.twin.entity.Slot; import com.warehouse.twin.service.*; import jakarta.validation.Valid; import org.springframework.web.bind.annotation.*;
+@RestController @RequestMapping("/api/slots")
+public class SlotController extends BaseCrudController<Slot>{private final SlotService s;private final SlotCorrectionService correction;public SlotController(SlotService s,SlotCorrectionService c){this.s=s;correction=c;}protected IService<Slot> service(){return s;}@PostMapping("/{id}/correct") public Result<Slot> correct(@PathVariable Long id,@Valid @RequestBody SlotCorrectionRequest r){return Result.ok(correction.correct(id,r));}}

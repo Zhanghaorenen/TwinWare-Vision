@@ -1,0 +1,1 @@
+package com.warehouse.twin.service; import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl; import com.warehouse.twin.entity.SysUser; import com.warehouse.twin.mapper.SysUserMapper; import org.springframework.stereotype.Service; @Service public class SysUserService extends ServiceImpl<SysUserMapper,SysUser>{}
