@@ -1,3 +1,18 @@
-import{createRouter,createWebHistory}from'vue-router';
-import Dashboard from'../views/Dashboard.vue';import CameraMonitor from'../views/CameraMonitor.vue';import SlotManagement from'../views/SlotManagement.vue';import EventList from'../views/EventList.vue';import AlarmList from'../views/AlarmList.vue';import DigitalTwin from'../views/DigitalTwin.vue';import PersonState from'../views/PersonState.vue';
-const routes=[['/','Dashboard','驾驶舱',Dashboard],['/camera','CameraMonitor','实时识别',CameraMonitor],['/slots','SlotManagement','库位管理',SlotManagement],['/events','EventList','取放事件',EventList],['/alarms','AlarmList','告警管理',AlarmList],['/twin','DigitalTwin','数字孪生',DigitalTwin],['/persons','PersonState','人员状态',PersonState]].map(([path,name,title,component])=>({path,name,meta:{title},component}));export default createRouter({history:createWebHistory(),routes})
+import { createRouter, createWebHistory } from "vue-router";
+import Dashboard from "../views/Dashboard.vue";
+import CameraMonitor from "../views/CameraMonitor.vue";
+import SlotManagement from "../views/SlotManagement.vue";
+import EventList from "../views/EventList.vue";
+import AlarmList from "../views/AlarmList.vue";
+import DigitalTwin from "../views/DigitalTwin.vue";
+import PersonState from "../views/PersonState.vue";
+const routes = [
+  ["/", "Dashboard", "驾驶舱", Dashboard],
+  ["/camera", "CameraMonitor", "实时识别", CameraMonitor],
+  ["/slots", "SlotManagement", "库位管理", SlotManagement],
+  ["/events", "EventList", "取放事件", EventList],
+  ["/alarms", "AlarmList", "告警管理", AlarmList],
+  ["/twin", "DigitalTwin", "数字孪生", DigitalTwin],
+  ["/persons", "PersonState", "人员状态", PersonState],
+].map(([path, name, title, component]) => ({ path, name, meta: { title }, component }));
+export default createRouter({ history: createWebHistory(), routes });
