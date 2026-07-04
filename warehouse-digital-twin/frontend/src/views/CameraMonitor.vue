@@ -1,2 +1,73 @@
-<script setup>import{onMounted,ref}from'vue';import{cameraApi}from'../api';import{ElMessage}from'element-plus';const cameras=ref([]),selected=ref(null),dialog=ref(false),form=ref({code:'',name:'',rtspUrl:'',installPosition:'',onlineStatus:1});async function load(){cameras.value=await cameraApi.list();selected.value||=cameras.value[0]}async function save(){await cameraApi.create(form.value);ElMessage.success('摄像头已添加');dialog.value=false;await load()}onMounted(load)</script>
-<template><div class="toolbar"><el-select v-model="selected" value-key="id" placeholder="选择固定摄像头"><el-option v-for="c in cameras" :key="c.id" :label="c.name" :value="c"/></el-select><el-button type="primary" @click="dialog=true">新增摄像头</el-button></div><section class="grid-2"><article class="panel"><div class="panel-title"><h2>{{selected?.name||'实时画面'}}</h2><el-tag type="success">{{selected?.onlineStatus?'在线':'离线'}}</el-tag></div><div class="video-stage"><span>等待 YOLO 服务视频帧 / {{selected?.rtspUrl||'未配置 RTSP'}}</span><div class="slot-box" style="left:12%;top:24%;width:25%;height:30%">A01 ROI</div><div class="bbox" style="left:17%;top:29%;width:16%;height:21%">carton 0.93</div><div class="bbox" style="left:64%;top:20%;width:13%;height:55%;border-color:#f4a340;background:#f4a340cc">person 0.91</div></div></article><article class="panel"><div class="panel-title"><h2>摄像头列表</h2></div><el-table :data="cameras"><el-table-column prop="code" label="编号"/><el-table-column prop="name" label="名称"/><el-table-column label="状态"><template #default="s"><el-tag :type="s.row.onlineStatus?'success':'info'">{{s.row.onlineStatus?'在线':'离线'}}</el-tag></template></el-table-column></el-table></article></section><el-dialog v-model="dialog" title="新增固定摄像头" width="520"><el-form label-position="top"><div class="form-row"><el-form-item label="编号"><el-input v-model="form.code"/></el-form-item><el-form-item label="名称"><el-input v-model="form.name"/></el-form-item></div><el-form-item label="RTSP 地址"><el-input v-model="form.rtspUrl"/></el-form-item><el-form-item label="固定安装位置"><el-input v-model="form.installPosition" placeholder="北墙 / 顶部 / A货架前方"/></el-form-item></el-form><template #footer><el-button @click="dialog=false">取消</el-button><el-button type="primary" @click="save">保存</el-button></template></el-dialog></template>
+<script setup>
+import { onMounted, ref } from "vue";
+import { cameraApi } from "../api";
+import { ElMessage } from "element-plus";
+const cameras = ref([]),
+  selected = ref(null),
+  dialog = ref(false),
+  form = ref({ code: "", name: "", rtspUrl: "", installPosition: "", onlineStatus: 1 });
+async function load() {
+  cameras.value = await cameraApi.list();
+  selected.value ||= cameras.value[0];
+}
+async function save() {
+  await cameraApi.create(form.value);
+  ElMessage.success("摄像头已添加");
+  dialog.value = false;
+  await load();
+}
+onMounted(load);
+</script>
+<template>
+  <div class="toolbar">
+    <el-select v-model="selected" value-key="id" placeholder="选择固定摄像头"
+      ><el-option v-for="c in cameras" :key="c.id" :label="c.name" :value="c" /></el-select
+    ><el-button type="primary" @click="dialog = true">新增摄像头</el-button>
+  </div>
+  <section class="grid-2">
+    <article class="panel">
+      <div class="panel-title">
+        <h2>{{ selected?.name || "实时画面" }}</h2>
+        <el-tag type="success">{{ selected?.onlineStatus ? "在线" : "离线" }}</el-tag>
+      </div>
+      <div class="video-stage">
+        <span>等待 YOLO 服务视频帧 / {{ selected?.rtspUrl || "未配置 RTSP" }}</span>
+        <div class="slot-box" style="left: 12%; top: 24%; width: 25%; height: 30%">A01 ROI</div>
+        <div class="bbox" style="left: 17%; top: 29%; width: 16%; height: 21%">carton 0.93</div>
+        <div
+          class="bbox"
+          style="left: 64%; top: 20%; width: 13%; height: 55%; border-color: #f4a340; background: #f4a340cc"
+        >
+          person 0.91
+        </div>
+      </div>
+    </article>
+    <article class="panel">
+      <div class="panel-title"><h2>摄像头列表</h2></div>
+      <el-table :data="cameras"
+        ><el-table-column prop="code" label="编号" /><el-table-column prop="name" label="名称" /><el-table-column
+          label="状态"
+          ><template #default="s"
+            ><el-tag :type="s.row.onlineStatus ? 'success' : 'info'">{{
+              s.row.onlineStatus ? "在线" : "离线"
+            }}</el-tag></template
+          ></el-table-column
+        ></el-table
+      >
+    </article>
+  </section>
+  <el-dialog v-model="dialog" title="新增固定摄像头" width="520"
+    ><el-form label-position="top"
+      ><div class="form-row">
+        <el-form-item label="编号"><el-input v-model="form.code" /></el-form-item
+        ><el-form-item label="名称"><el-input v-model="form.name" /></el-form-item>
+      </div>
+      <el-form-item label="RTSP 地址"><el-input v-model="form.rtspUrl" /></el-form-item
+      ><el-form-item label="固定安装位置"
+        ><el-input v-model="form.installPosition" placeholder="北墙 / 顶部 / A货架前方" /></el-form-item></el-form
+    ><template #footer
+      ><el-button @click="dialog = false">取消</el-button
+      ><el-button type="primary" @click="save">保存</el-button></template
+    ></el-dialog
+  >
+</template>
