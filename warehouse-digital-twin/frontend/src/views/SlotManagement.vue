@@ -1,36 +1,36 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { slotApi } from '../api'
+import { onMounted, ref } from "vue";
+import { ElMessage } from "element-plus";
+import { slotApi } from "../api";
 
-const rows = ref([])
-const dialog = ref(false)
-const current = ref(null)
-const form = ref({ status: 'EMPTY', cargoType: '', operator: '', remark: '' })
+const rows = ref([]);
+const dialog = ref(false);
+const current = ref(null);
+const form = ref({ status: "EMPTY", cargoType: "", operator: "", remark: "" });
 
 async function load() {
-  rows.value = await slotApi.list()
+  rows.value = await slotApi.list();
 }
 
 function open(row) {
-  current.value = row
+  current.value = row;
   form.value = {
     status: row.status,
-    cargoType: row.cargoType || '',
-    operator: '',
-    remark: '',
-  }
-  dialog.value = true
+    cargoType: row.cargoType || "",
+    operator: "",
+    remark: "",
+  };
+  dialog.value = true;
 }
 
 async function correct() {
-  await slotApi.correct(current.value.id, form.value)
-  ElMessage.success('修正已记录并推送')
-  dialog.value = false
-  await load()
+  await slotApi.correct(current.value.id, form.value);
+  ElMessage.success("修正已记录并推送");
+  dialog.value = false;
+  await load();
 }
 
-onMounted(load)
+onMounted(load);
 </script>
 
 <template>
@@ -44,7 +44,9 @@ onMounted(load)
       <el-table-column prop="cameraId" label="摄像头 ID" />
       <el-table-column prop="status" label="状态">
         <template #default="scope">
-          <el-tag :type="scope.row.status === 'OCCUPIED' ? 'success' : scope.row.status === 'ABNORMAL' ? 'danger' : 'info'">
+          <el-tag
+            :type="scope.row.status === 'OCCUPIED' ? 'success' : scope.row.status === 'ABNORMAL' ? 'danger' : 'info'"
+          >
             {{ scope.row.status }}
           </el-tag>
         </template>
