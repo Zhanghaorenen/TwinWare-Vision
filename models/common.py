@@ -20,8 +20,8 @@ import numpy as np
 import pandas as pd
 import requests
 import torch
-import torch.nn as nn
 from PIL import Image
+from torch import nn
 
 # Import 'ultralytics' package or install if missing
 try:
@@ -55,7 +55,8 @@ from utils.general import (
     xyxy2xywh,
     yaml_load,
 )
-from utils.torch_utils import copy_attr, smart_inference_mode, smart_amp_autocast
+from utils.torch_utils import copy_attr, smart_amp_autocast, smart_inference_mode
+
 
 def autopad(k, p=None, d=1):
     """Pads kernel to 'same' output shape, adjusting for optional dilation; returns padding size.
@@ -631,11 +632,10 @@ class DetectMultiBackend(nn.Module):
             input_details = interpreter.get_input_details()  # inputs
             output_details = interpreter.get_output_details()  # outputs
             # load metadata
-            with contextlib.suppress(zipfile.BadZipFile):
-                with zipfile.ZipFile(w, "r") as model:
-                    meta_file = model.namelist()[0]
-                    meta = ast.literal_eval(model.read(meta_file).decode("utf-8"))
-                    stride, names = int(meta["stride"]), meta["names"]
+            with contextlib.suppress(zipfile.BadZipFile), zipfile.ZipFile(w, "r") as model:
+                meta_file = model.namelist()[0]
+                meta = ast.literal_eval(model.read(meta_file).decode("utf-8"))
+                stride, names = int(meta["stride"]), meta["names"]
         elif tfjs:  # TF.js
             raise NotImplementedError("ERROR: YOLOv5 TF.js inference is not supported")
         # PaddlePaddle
@@ -784,7 +784,7 @@ class DetectMultiBackend(nn.Module):
         warmup_types = self.pt, self.jit, self.onnx, self.engine, self.saved_model, self.pb, self.triton
         if any(warmup_types) and (self.device.type != "cpu" or self.triton):
             im = torch.empty(*imgsz, dtype=torch.half if self.fp16 else torch.float, device=self.device)  # input
-            for _ in range(2 if self.jit else 1):  #
+            for _ in range(2 if self.jit else 1):
                 self.forward(im)  # warmup
 
     @staticmethod
